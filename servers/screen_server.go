@@ -2,31 +2,31 @@ package pty_servers
 
 import (
   "net"
-  // "os"
-  // "io"
   "bytes"
 )
 
 type ScreenServer struct {
-  log_file bytes.Buffer
+  log_file     bytes.Buffer
+  server       net.Listener
 }
 
 func NewScreenServer() (ss *ScreenServer) {
   ss = new(ScreenServer)
 
   var log_buffer bytes.Buffer
-  ss.log_file = log_buffer
+  ss.log_file     = log_buffer
 
   return
 }
 
-func (ss *ScreenServer) Listen (channel chan []byte){
+func (ss *ScreenServer) Listen (port string, channel chan []byte){
   const MAX_CLIENTS = 100
-  server, err := net.Listen("tcp", ":2001")
+  var err error
+  ss.server, err = net.Listen("tcp", ":"+port)
   if err != nil { panic(err) }
 
   connections := make([]net.Conn, 0, MAX_CLIENTS)
-  go ss.accept_connections(server, &connections)
+  go ss.accept_connections(&connections)
 
   for {
     screen_bytes := <-channel
@@ -35,12 +35,11 @@ func (ss *ScreenServer) Listen (channel chan []byte){
       conn.Write(screen_bytes)
     }
   }
-
 }
 
-func (ss *ScreenServer) accept_connections(server net.Listener, connections *[]net.Conn){
+func (ss *ScreenServer) accept_connections(connections *[]net.Conn){
   for {
-    conn, err := server.Accept()
+    conn, err := ss.server.Accept()
     if err != nil { panic(err) }
     conn.Write( ss.log_file.Bytes() )
     *connections = append(*connections, conn)

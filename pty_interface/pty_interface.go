@@ -9,13 +9,13 @@ import (
 
 const READSIZE = 1024
 
-func Pty(command string, in_chan chan []byte, out_chan chan []byte) {
+func Pty(command string, rows uint16, cols uint16, in_chan chan []byte, out_chan chan []byte) {
 
   c := exec.Command(command)
   f, err := pty.Start(c)
   if err != nil { panic(err) }
 
-  pty.Setsize( f, 20, 40 )
+  pty.Setsize( f, rows, cols )
 
   go func(){
     for bytes := range in_chan {
