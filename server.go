@@ -10,8 +10,10 @@ func main() {
   key_channel     := make(chan []byte)
   screen_channel  := make(chan []byte)
 
+  screen_server := pty_servers.NewScreenServer()
+
   go pty_servers.KeyServer(key_channel)
-  go pty_servers.ScreenServer(screen_channel)
+  go screen_server.Listen(screen_channel)
 
   pty_interface.Pty("vim", key_channel, screen_channel)
 }

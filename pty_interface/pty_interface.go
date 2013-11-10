@@ -2,7 +2,8 @@ package pty_interface
 
 import (
   "fmt"
-  "github.com/kr/pty"
+  // "github.com/kr/pty"
+  "github.com/dapplebeforedawn/pty"
   "os/exec"
 )
 
@@ -13,6 +14,8 @@ func Pty(command string, in_chan chan []byte, out_chan chan []byte) {
   c := exec.Command(command)
   f, err := pty.Start(c)
   if err != nil { panic(err) }
+
+  pty.Setsize( f, 20, 40 )
 
   go func(){
     for bytes := range in_chan {

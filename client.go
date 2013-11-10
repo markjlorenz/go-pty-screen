@@ -10,10 +10,10 @@ import (
 
 func main() {
   key_conn, err     := net.Dial("tcp", "localhost:2000")
-  if err != nil { }
+  if err != nil { panic(err) }
 
   screen_conn, err  := net.Dial("tcp", "localhost:2001")
-  if err != nil { }
+  if err != nil { panic(err) }
 
   tty, _       := os.Open("/dev/tty")
   tty_fd       := int( tty.Fd() )
