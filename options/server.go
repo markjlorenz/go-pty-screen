@@ -7,14 +7,11 @@ import (
 )
 
 type Server struct {
-  Rows          uint16
-  Cols          uint16
+  Rows         uint16
+  Cols         uint16
   KeyPort      string
   ScreenPort   string
-  App           string
-}
-
-type Client struct {
+  App          string
 }
 
 func (s *Server) Parse() {

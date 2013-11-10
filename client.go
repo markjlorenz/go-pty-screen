@@ -6,13 +6,17 @@ import (
   "os"
   "net"
   "code.google.com/p/go.crypto/ssh/terminal"
+  "dapplebeforedawn/share-pty/options"
 )
 
 func main() {
-  key_conn, err     := net.Dial("tcp", "localhost:2000")
+  opts := options.Client{}
+  opts.Parse()
+
+  key_conn, err     := net.Dial("tcp", opts.ServerIP+":"+opts.KeyPort)
   if err != nil { panic(err) }
 
-  screen_conn, err  := net.Dial("tcp", "localhost:2001")
+  screen_conn, err  := net.Dial("tcp", opts.ServerIP+":"+opts.ScreenPort)
   if err != nil { panic(err) }
 
   tty, _       := os.Open("/dev/tty")
