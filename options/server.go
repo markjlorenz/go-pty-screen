@@ -18,7 +18,7 @@ func (s *Server) Parse() {
   tty, _        := os.Open("/dev/tty")
   tty_fd        := int( tty.Fd() )
 
-  rows, cols, _ := terminal.GetSize( tty_fd )
+  cols, rows, _ := terminal.GetSize( tty_fd )
   key_port      := "2000"
   screen_port   := "2001"
 

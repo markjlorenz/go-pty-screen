@@ -15,11 +15,11 @@ func NewKeyServer() (ks *KeyServer) {
 
 func (ks *KeyServer) Listen(port string, channel chan []byte) {
   server, err := net.Listen("tcp", ":"+port)
-  if err != nil { }
+  if err != nil { panic(err) }
 
   for {
     conn, err := server.Accept()
-    if err != nil { }
+    if err != nil { panic(err) }
     go ks.connection_to_channel(conn, channel)
   }
 }
@@ -27,7 +27,8 @@ func (ks *KeyServer) Listen(port string, channel chan []byte) {
 func (ks *KeyServer) connection_to_channel(conn net.Conn, channel chan []byte) {
   for {
     bytes     := make([]byte, READSIZE)
-    read, _   := conn.Read(bytes)
+    read, err := conn.Read(bytes)
+    if err != nil { return }
     bytes = bytes[:read]
     channel <- bytes
   }

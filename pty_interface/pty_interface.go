@@ -2,7 +2,6 @@ package pty_interface
 
 import (
   "fmt"
-  // "github.com/kr/pty"
   "github.com/dapplebeforedawn/pty"
   "os/exec"
 )
@@ -19,7 +18,8 @@ func Pty(command string, rows uint16, cols uint16, in_chan chan []byte, out_chan
 
   go func(){
     for bytes := range in_chan {
-      fmt.Print( string(bytes) )
+      // fmt.Print( string(bytes) )
+      fmt.Print( bytes )
       f.Write(bytes)
     }
   }()

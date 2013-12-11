@@ -5,7 +5,6 @@ import (
   "io"
   "os"
   "net"
-  "code.google.com/p/go.crypto/ssh/terminal"
   "dapplebeforedawn/share-pty/options"
 )
 
@@ -19,13 +18,8 @@ func main() {
   screen_conn, err  := net.Dial("tcp", opts.ServerIP+":"+opts.ScreenPort)
   if err != nil { panic(err) }
 
-  tty, _       := os.Open("/dev/tty")
-  tty_fd       := int( tty.Fd() )
-  tty_mode, _  := terminal.MakeRaw( tty_fd )
-
   go io.Copy(key_conn, os.Stdin)
   io.Copy(os.Stdout, screen_conn)
 
   fmt.Println("type 'reset' to restore your terminal")
-  terminal.Restore( tty_fd, tty_mode )  // why u no work?
 }
