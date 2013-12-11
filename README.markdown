@@ -28,8 +28,8 @@ go-pty-client <ip of server>
 go-pty-client 192.168.100.1   # shows us vim
 go-pty-client --key_port=2002 --screen_port=2003  192.168.100.1  # shows us the test runner
 
-# Note, for now you should put the terminal into raw mode e.g.:
-stty raw; go-pty-client <ip of server>; reset
+# its not a bad idea to chain a call to `reset` at the end
+go-pty-client <ip of server>; reset
 ```
 
 ## Project Structure
