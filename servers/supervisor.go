@@ -8,7 +8,7 @@ import (
   "bufio"
   "strconv"
   "strings"
-  "fmt"
+  // "fmt"
 
   "dapplebeforedawn/share-pty/pty_interface"
 )
@@ -53,14 +53,14 @@ func (visor *Supervisor) process_request(conn net.Conn) {
 }
 
 func (visor *Supervisor) route(req *http.Request) (string){
-  fmt.Println(req.URL)
+  // fmt.Println(req.URL)
   switch route_string := (req.Method + req.URL.Path)
   route_string {
   case "GET/servers":
     return visor.serve_list()
   case "POST/servers":
     alias, command, cols, rows := visor.parse_instructions(req.Body)
-    fmt.Println("Spinning Up: ", alias, command)
+    // fmt.Println("Spinning Up: ", alias, command)
     visor.new_server(alias, command, cols, rows)
     return visor.serve_create()
   default:
