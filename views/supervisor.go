@@ -4,6 +4,10 @@ import (
   "code.google.com/p/goncurses"
   "dapplebeforedawn/share-pty/servers"
   "dapplebeforedawn/share-pty/views/supervisor"
+  "strings"
+  "strconv"
+  "bytes"
+  "net/http"
 )
 
 type Supervisor struct {
@@ -18,7 +22,8 @@ func NewSupervisor() (supervisor *Supervisor){
   _, err := goncurses.Init()
   if err != nil { panic(err) }
 
-  goncurses.Cursor(0) // no cursor please
+  goncurses.Cursor(2) // high visibilty cursor
+  goncurses.StartColor()
 
   supervisor.list_window    = supervisor_views.NewList()
   supervisor.command_window = supervisor_views.NewCommand()
@@ -38,5 +43,19 @@ func (supervisor *Supervisor) WatchFeed(feed chan pty_servers.PtyShare) {
   for update := range feed {
     supervisor.list_window.AddItem(update)
     supervisor.list_window.Refresh()
+  }
+}
+
+func (supervisor *Supervisor) WatchCommands(port int){
+  for {
+    input := supervisor.command_window.GetInput()
+
+    fields := strings.Fields(input)
+    if (len(fields) != 5) { print("5 fields required"); return }
+
+    body := bytes.NewBufferString(strings.Join(fields[1:], " "))
+    resp, err := http.Post("http://localhost:"+strconv.Itoa(port)+"/servers", "text/plain", body)
+    defer resp.Body.Close()
+    if err != nil { panic(err) }
   }
 }

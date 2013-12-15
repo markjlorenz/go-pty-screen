@@ -10,6 +10,7 @@ import (
 
 type List struct {
   *goncurses.Window
+  header_color int16
 }
 
 func NewList() (list *List){
@@ -18,12 +19,22 @@ func NewList() (list *List){
   window, err := goncurses.NewWindow(win_height-3, win_width, 0, 0)
   if err != nil { panic(err) }
 
+  list.header_color = 20
+  err = goncurses.InitPair(list.header_color, goncurses.C_MAGENTA, goncurses.C_BLACK)
+  if err != nil { panic(err) }
+
   list.Window = &window
+  list.draw_initial()
+  return
+}
+
+func (list *List) draw_initial(){
+  list.ColorOn(list.header_color)
   list.MovePrintln(1, 2, list.build_row("ALIAS", "COMMAND", "KEY_PORT", "SCREEN_PORT"))
+  list.ColorOff(list.header_color)
   list.MovePrintln(2, 2, "No servers running.  Type: `new <alias> <command> <rows> <cols>` into the command window to start one.")
   list.Move(2, 2)
   list.Border()
-  return
 }
 
 func (list *List) AddItem(item pty_servers.PtyShare) (){
