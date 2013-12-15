@@ -14,18 +14,21 @@ import (
 )
 
 type PtyShare struct {
-  key_server    *KeyServer
-  screen_server *ScreenServer
-  command       string
+  KeyServer    *KeyServer
+  ScreenServer *ScreenServer
+  Command      string
+  Alias        string
 }
 
 type Supervisor struct {
-  pty_shares map[string]*PtyShare
+  pty_shares  map[string]*PtyShare
+  update_chan chan PtyShare
 }
 
-func NewSupervisor() (visor *Supervisor){
+func NewSupervisor(updates chan PtyShare) (visor *Supervisor){
   visor = new(Supervisor)
-  visor.pty_shares = make(map[string]*PtyShare)
+  visor.pty_shares  = make(map[string]*PtyShare)
+  visor.update_chan = updates
   return
 }
 
@@ -84,10 +87,13 @@ func (visor *Supervisor) new_server(alias string, command string, cols int, rows
   go pty_interface.Pty(command, uint16(rows), uint16(cols), key_channel, screen_channel)
 
   share := PtyShare{}
-  share.key_server         = key_server
-  share.screen_server      = screen_server
-  share.command            = command
+  share.KeyServer    = key_server
+  share.ScreenServer = screen_server
+  share.Command      = command
+  share.Alias        = alias
+
   visor.pty_shares[alias] = &share
+  visor.update_chan <- share
 }
 
 func (visor *Supervisor) parse_instructions(instructions io.Reader) (alias string, command string, cols int, rows int){
@@ -105,10 +111,10 @@ func (visor *Supervisor) parse_instructions(instructions io.Reader) (alias strin
 func (visor *Supervisor) serve_list() (string){
   response := ""
   for alias, pty_share := range visor.pty_shares {
-    key_port    := pty_share.key_server.Port
-    screen_port := pty_share.screen_server.Port
+    key_port    := pty_share.KeyServer.Port
+    screen_port := pty_share.ScreenServer.Port
 
-    response += alias+" "+pty_share.command+" "+strconv.Itoa(key_port)+" "+strconv.Itoa(screen_port)+"\r\n"
+    response += alias+" "+pty_share.Command+" "+strconv.Itoa(key_port)+" "+strconv.Itoa(screen_port)+"\r\n"
   }
   return visor.http_response(200, "OK", response)
 }

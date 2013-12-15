@@ -13,9 +13,11 @@ func main() {
   opts := options.Server{}
   opts.Parse()
 
-  supervisor := pty_servers.NewSupervisor()
-  go supervisor.Listen(opts.Port)
-
+  view_feed := make(chan pty_servers.PtyShare)
   view := pty_views.NewSupervisor()
-  print(view)
+  go view.WatchFeed(view_feed)
+  view.Refresh()
+
+  supervisor := pty_servers.NewSupervisor(view_feed)
+  supervisor.Listen(opts.Port)
 }
