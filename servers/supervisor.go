@@ -101,7 +101,10 @@ func (visor *Supervisor) parse_instructions(instructions io.Reader) (alias strin
 func (visor *Supervisor) serve_list() (string){
   response := ""
   for alias, pty_share := range visor.pty_shares {
-    response += alias+" "+pty_share.command+"\r\n"
+    key_port    := pty_share.key_server.Port
+    screen_port := pty_share.screen_server.Port
+
+    response += alias+" "+pty_share.command+" "+strconv.Itoa(key_port)+" "+strconv.Itoa(screen_port)+"\r\n"
   }
   return visor.http_response(200, "OK", response)
 }
