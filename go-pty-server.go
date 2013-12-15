@@ -2,7 +2,6 @@ package main
 
 import (
   "dapplebeforedawn/share-pty/servers"
-  // "dapplebeforedawn/share-pty/pty_interface"
   "dapplebeforedawn/share-pty/options"
 
   "fmt"

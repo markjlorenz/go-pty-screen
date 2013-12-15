@@ -60,16 +60,16 @@ func (visor *Supervisor) route(req *http.Request) (string){
   case "GET/servers":
     return visor.serve_list()
   case "POST/servers":
-    alias, command := visor.parse_instructions(req.Body)
+    alias, command, cols, rows := visor.parse_instructions(req.Body)
     fmt.Println("Spinning Up: ", alias, command)
-    visor.new_server(alias, command)
+    visor.new_server(alias, command, cols, rows)
     return visor.serve_create()
   default:
     return visor.four_oh_four()
   }
 }
 
-func (visor *Supervisor) new_server(alias string, command string){
+func (visor *Supervisor) new_server(alias string, command string, cols int, rows int){
   // find 2 free ports
   // start key server, screen servers and pty
   // stash the new PtyShare in pty_shares under the alias name
@@ -82,7 +82,7 @@ func (visor *Supervisor) new_server(alias string, command string){
   // let the OS assign a port
   go key_server.Listen(0, key_channel)
   go screen_server.Listen(0, screen_channel)
-  go pty_interface.Pty(command, 20, 80, key_channel, screen_channel)
+  go pty_interface.Pty(command, uint16(rows), uint16(cols), key_channel, screen_channel)
 
   share := PtyShare{}
   share.key_server         = key_server
@@ -91,11 +91,16 @@ func (visor *Supervisor) new_server(alias string, command string){
   visor.pty_shares[alias] = &share
 }
 
-func (visor *Supervisor) parse_instructions(instructions io.Reader) (alias string, command string){
+func (visor *Supervisor) parse_instructions(instructions io.Reader) (alias string, command string, cols int, rows int){
+
   raw_cmd, err := ioutil.ReadAll(instructions)
   if err != nil { panic(err) }
   fields := strings.Fields(string(raw_cmd))
-  return fields[0], fields[1]
+  alias   = fields[0]
+  command = fields[1]
+  cols, _ = strconv.Atoi(fields[2])
+  rows, _ = strconv.Atoi(fields[3])
+  return
 }
 
 func (visor *Supervisor) serve_list() (string){
