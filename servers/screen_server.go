@@ -3,11 +3,13 @@ package pty_servers
 import (
   "net"
   "bytes"
+  "strconv"
 )
 
 type ScreenServer struct {
-  log_file     bytes.Buffer
-  server       net.Listener
+  log_file   bytes.Buffer
+  server     net.Listener
+  Port       uint16
 }
 
 func NewScreenServer() (ss *ScreenServer) {
@@ -19,11 +21,14 @@ func NewScreenServer() (ss *ScreenServer) {
   return
 }
 
-func (ss *ScreenServer) Listen (port string, channel chan []byte){
+func (ss *ScreenServer) Listen (port uint16, channel chan []byte){
   const MAX_CLIENTS = 100
   var err error
-  ss.server, err = net.Listen("tcp", ":"+port)
+  port_string := strconv.Itoa(int(port))
+  ss.server, err = net.Listen("tcp", ":"+port_string)
   if err != nil { panic(err) }
+
+  ss.Port = port
 
   connections := make([]net.Conn, 0, MAX_CLIENTS)
   go ss.accept_connections(&connections)
