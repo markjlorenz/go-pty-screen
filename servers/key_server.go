@@ -8,19 +8,19 @@ import (
 const READSIZE = 1024
 
 type KeyServer struct {
-  Port uint16
+  Port int
 }
 
 func NewKeyServer() (ks *KeyServer) {
   return new(KeyServer)
 }
 
-func (ks *KeyServer) Listen(port uint16, channel chan []byte) {
-  port_string := strconv.Itoa(int(port))
+func (ks *KeyServer) Listen(port int, channel chan []byte) {
+  port_string := strconv.Itoa(port)
   server, err := net.Listen("tcp", ":"+port_string)
   if err != nil { panic(err) }
 
-  ks.Port = port
+  ks.Port = server.Addr().(*net.TCPAddr).Port
 
   for {
     conn, err := server.Accept()

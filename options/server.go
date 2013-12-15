@@ -9,8 +9,8 @@ import (
 type Server struct {
   Rows         uint16
   Cols         uint16
-  KeyPort      uint16
-  ScreenPort   uint16
+  KeyPort      int
+  ScreenPort   int
   App          string
 }
 
@@ -31,8 +31,8 @@ func (s *Server) Parse() {
 
   s.Rows       = uint16(rows)
   s.Cols       = uint16(cols)
-  s.KeyPort    = uint16(key_port)
-  s.ScreenPort = uint16(screen_port)
+  s.KeyPort    = key_port
+  s.ScreenPort = screen_port
   s.App        = flag.Arg(0)
 }
 

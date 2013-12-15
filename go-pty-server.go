@@ -9,6 +9,7 @@ import (
 )
 
 func main() {
+  fmt.Println("Started")
   opts := options.Server{}
   opts.Parse()
 
