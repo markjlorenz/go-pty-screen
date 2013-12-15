@@ -13,5 +13,5 @@ func main() {
   opts.Parse()
 
   supervisor := pty_servers.NewSupervisor()
-  supervisor.Listen(opts.KeyPort)
+  supervisor.Listen(opts.Port)
 }

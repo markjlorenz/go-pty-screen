@@ -8,10 +8,9 @@ import (
   "bufio"
   "strconv"
   "strings"
+  "fmt"
 
   "dapplebeforedawn/share-pty/pty_interface"
-
-  "fmt"
 )
 
 type PtyShare struct {
