@@ -21,15 +21,19 @@ func NewList() (list *List){
   window, err           := goncurses.NewWindow(win_height, win_width, 0, 0)
   if err != nil { panic(err) }
 
-  list.header_color = 20
-  err = goncurses.InitPair(list.header_color, goncurses.C_MAGENTA, goncurses.C_BLACK)
-  if err != nil { panic(err) }
-
   list.Window = &window
+  list.init_colors()
   list.draw_initial()
 
   go list.SelectRow()
   return
+}
+
+func (list *List) init_colors() {
+  list.header_color = 20
+  err := goncurses.InitPair(list.header_color, goncurses.C_MAGENTA, goncurses.C_BLACK)
+  if err != nil { panic(err) }
+
 }
 
 func (list *List) draw_initial() {
@@ -90,7 +94,7 @@ func (list *List) SelectRow() (pty_servers.PtyShare){
     case 10:
       return list.items[list.current_item]
     default:
-      print("Such fail. WoW.")
+      print("Such fail. WoW.  Try 'j', 'k', or <enter>.")
     }
   }
 }

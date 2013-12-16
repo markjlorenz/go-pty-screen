@@ -19,13 +19,17 @@ func NewList() (list *List){
   window, err           := goncurses.NewWindow(win_height-3, win_width, 0, 0)
   if err != nil { panic(err) }
 
-  list.header_color = 20
-  err = goncurses.InitPair(list.header_color, goncurses.C_MAGENTA, goncurses.C_BLACK)
-  if err != nil { panic(err) }
 
   list.Window = &window
+  list.init_colors()
   list.draw_initial()
   return
+}
+
+func (list *List) init_colors() {
+  list.header_color = 20
+  err := goncurses.InitPair(list.header_color, goncurses.C_MAGENTA, goncurses.C_BLACK)
+  if err != nil { panic(err) }
 }
 
 func (list *List) draw_initial(){
@@ -39,7 +43,6 @@ func (list *List) draw_initial(){
 
 func (list *List) AddItem(item pty_servers.PtyShare) (){
   lasty, _    := list.Getyx()
-
   key_port    := strconv.Itoa(item.KeyServer.Port)
   screen_port := strconv.Itoa(item.ScreenServer.Port)
   list.MovePrintln(lasty, 2, list.build_row(item.Alias, item.Command, key_port, screen_port))
