@@ -16,7 +16,7 @@ func NewScreenServer() (ss *ScreenServer) {
   ss = new(ScreenServer)
 
   var log_buffer bytes.Buffer
-  ss.log_file     = log_buffer
+  ss.log_file = log_buffer
 
   return
 }
