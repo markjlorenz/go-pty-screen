@@ -2,7 +2,6 @@ package supervisor_views
 
 import (
   "code.google.com/p/goncurses"
-  "time"
 )
 
 type Command struct {
@@ -64,6 +63,6 @@ func (command *Command) FlashError(message string) (){
   command.Print(message)
   command.ColorOn(command.error_color)
   command.Refresh()
-  time.Sleep(1000 * time.Millisecond)
+  goncurses.NapMilliseconds(1000)
   command.clear()
 }

@@ -50,6 +50,7 @@ func (list *List) Fetch() {
   }
 }
 
-func (list *List) GetSelection() {
-  list.view.GetString(999)
+func (list *List) GetSelection() (key_port, screen_port int){
+  pty_share := list.view.SelectRow()
+  return pty_share.KeyServer.Port, pty_share.ScreenServer.Port
 }

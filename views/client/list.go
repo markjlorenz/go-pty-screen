@@ -11,6 +11,8 @@ import (
 type List struct {
   *goncurses.Window
   header_color int16
+  current_item int
+  items        []pty_servers.PtyShare
 }
 
 func NewList() (list *List){
@@ -25,6 +27,8 @@ func NewList() (list *List){
 
   list.Window = &window
   list.draw_initial()
+
+  go list.SelectRow()
   return
 }
 
@@ -33,9 +37,29 @@ func (list *List) draw_initial() {
   list.Border()
 }
 
+func (list *List) refresh(){
+  list.Clear()
+  list.draw_initial()
+  for _, item := range list.items {
+    list.print_row(item)
+  }
+  list.Refresh()
+}
+
 func (list *List) AddItem(item pty_servers.PtyShare) (){
+  list.items = append(list.items, item)
+  list.refresh()
+}
+
+func (list *List) print_row(item pty_servers.PtyShare) (){
   lasty, _    := list.Getyx()
-  list.MovePrintln(lasty, 2, list.build_row(item.Alias, item.Command))
+  if (item == list.items[list.current_item]){
+    list.ColorOn(list.header_color)
+    list.MovePrintln(lasty, 2, list.build_row(item.Alias, item.Command))
+    list.ColorOff(list.header_color)
+  } else {
+    list.MovePrintln(lasty, 2, list.build_row(item.Alias, item.Command))
+  }
   list.Border()
 }
 
@@ -53,4 +77,34 @@ func (list *List) Border() {
   list.Box('|', '_')
   list.MovePrint(0, 2, "[ Available PTYs ]")
   list.Move(lasty, lastx)
+}
+
+func (list *List) SelectRow() (pty_servers.PtyShare){
+  for {
+    switch char := list.GetChar()
+    char {
+    case 'k':
+      list.selection_up()
+    case 'j':
+      list.selection_down()
+    case 10:
+      return list.items[list.current_item]
+    default:
+      print("Such fail. WoW.")
+    }
+  }
+}
+
+func (list *List) selection_up() {
+  if (list.current_item <= 0) {
+    list.current_item = 0
+  } else { list.current_item -= 1 }
+  list.refresh()
+}
+
+func (list *List) selection_down(){
+  if (list.current_item >= len(list.items) - 1) {
+    list.current_item = len(list.items) - 1
+  } else { list.current_item += 1 }
+  list.refresh()
 }
