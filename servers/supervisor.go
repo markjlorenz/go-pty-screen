@@ -5,11 +5,11 @@ import (
   "net/http"
   "io"
   "io/ioutil"
+  "os"
   "bufio"
   "strconv"
   "strings"
-  // "fmt"
-
+  "time"
   "dapplebeforedawn/share-pty/pty_interface"
 )
 
@@ -84,7 +84,13 @@ func (visor *Supervisor) new_server(alias string, command string, cols int, rows
   // let the OS assign a port
   go key_server.Listen(0, key_channel)
   go screen_server.Listen(0, screen_channel)
-  go pty_interface.Pty(command, uint16(rows), uint16(cols), key_channel, screen_channel)
+  pty := pty_interface.NewPty(command, uint16(rows), uint16(cols), key_channel, screen_channel)
+
+  timestamp      := time.Now().Unix()
+  temp_file, err := os.Create("/tmp/"+strconv.Itoa(int(timestamp))+"~go-pty-screen~"+alias)
+  if (err != nil) { panic(err) }
+  pty.LogWriter   = temp_file
+  go pty.Start()
 
   share := PtyShare{}
   share.KeyServer    = key_server
