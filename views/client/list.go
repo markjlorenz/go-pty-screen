@@ -1,8 +1,8 @@
-package supervisor_views
+package client_views
 
 import (
-  "code.google.com/p/goncurses"
   "dapplebeforedawn/share-pty/servers"
+  "code.google.com/p/goncurses"
   "strings"
   "strconv"
   "fmt"
@@ -16,7 +16,7 @@ type List struct {
 func NewList() (list *List){
   list = new(List)
   win_height, win_width := goncurses.StdScr().Maxyx()
-  window, err           := goncurses.NewWindow(win_height-3, win_width, 0, 0)
+  window, err           := goncurses.NewWindow(win_height, win_width, 0, 0)
   if err != nil { panic(err) }
 
   list.header_color = 20
@@ -28,32 +28,24 @@ func NewList() (list *List){
   return
 }
 
-func (list *List) draw_initial(){
-  list.ColorOn(list.header_color)
-  list.MovePrintln(1, 2, list.build_row("ALIAS", "COMMAND", "KEY_PORT", "SCREEN_PORT"))
-  list.ColorOff(list.header_color)
-  list.MovePrintln(2, 2, "No servers running.  Type: `new <alias> <command> <rows> <cols>` into the command window to start one.")
-  list.Move(2, 2)
+func (list *List) draw_initial() {
+  list.Move(1, 2)
   list.Border()
 }
 
 func (list *List) AddItem(item pty_servers.PtyShare) (){
   lasty, _    := list.Getyx()
-
-  key_port    := strconv.Itoa(item.KeyServer.Port)
-  screen_port := strconv.Itoa(item.ScreenServer.Port)
-  list.MovePrintln(lasty, 2, list.build_row(item.Alias, item.Command, key_port, screen_port))
-
+  list.MovePrintln(lasty, 2, list.build_row(item.Alias, item.Command))
   list.Border()
 }
 
-func (list *List) build_row(alias, command, key_port, screen_port string) (string){
+func (list *List) build_row(alias, command string) (string){
   _, row_length := list.Maxyx()
-  field_count   := 5 // 5 fields in PtyShare
+  field_count   := 3 // 5 fields in PtyShare
   segment_size  := (row_length / field_count) - 1
   format_string := strings.Repeat("%-"+strconv.Itoa(segment_size)+"s", field_count)
 
-  return fmt.Sprintf(format_string, alias, command, key_port, screen_port, "")
+  return fmt.Sprintf(format_string, alias, command, "")
 }
 
 func (list *List) Border() {

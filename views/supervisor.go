@@ -51,7 +51,10 @@ func (supervisor *Supervisor) WatchCommands(port int){
     input := supervisor.command_window.GetInput()
 
     fields := strings.Fields(input)
-    if (len(fields) != 5) { print("5 fields required"); return }
+    if (len(fields) != 5) {
+      supervisor.command_window.FlashError("5 fields required")
+      continue
+    }
 
     body := bytes.NewBufferString(strings.Join(fields[1:], " "))
     resp, err := http.Post("http://localhost:"+strconv.Itoa(port)+"/servers", "text/plain", body)

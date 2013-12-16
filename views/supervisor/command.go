@@ -2,26 +2,36 @@ package supervisor_views
 
 import (
   "code.google.com/p/goncurses"
+  "time"
 )
 
 type Command struct {
   *goncurses.Window
   prompt_color int16
+  error_color int16
 }
 
 func NewCommand() (command *Command){
   command = new(Command)
   win_height, win_width := goncurses.StdScr().Maxyx()
-  window, err := goncurses.NewWindow(3, win_width, win_height-3, 0)
+  window, err           := goncurses.NewWindow(3, win_width, win_height-3, 0)
   if err != nil { panic(err) }
 
-  command.prompt_color = 10
-  err = goncurses.InitPair(command.prompt_color, goncurses.C_MAGENTA, goncurses.C_BLACK)
-  if err != nil { panic(err) }
+  command.init_colors()
 
   command.Window = &window
   command.clear()
   return
+}
+
+func (command *Command) init_colors() {
+  command.prompt_color = 10
+  err := goncurses.InitPair(command.prompt_color, goncurses.C_MAGENTA, goncurses.C_BLACK)
+  if err != nil { panic(err) }
+
+  command.error_color = 11
+  err = goncurses.InitPair(command.error_color, goncurses.C_RED, goncurses.C_BLACK)
+  if err != nil { panic(err) }
 }
 
 func (command *Command) Border() {
@@ -46,4 +56,14 @@ func (command *Command) GetInput() (input string){
   command.clear()
   command.Touch() // so we get the cursor back
   return
+}
+
+func (command *Command) FlashError(message string) (){
+  command.clear()
+  command.ColorOn(command.error_color)
+  command.Print(message)
+  command.ColorOn(command.error_color)
+  command.Refresh()
+  time.Sleep(1000 * time.Millisecond)
+  command.clear()
 }
