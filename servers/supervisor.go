@@ -62,16 +62,16 @@ func (visor *Supervisor) route(req *http.Request) (string){
   case "GET/servers":
     return visor.serve_list()
   case "POST/servers":
-    alias, command, cols, rows := visor.parse_instructions(req.Body)
+    alias, command, rows, cols := visor.parse_instructions(req.Body)
     // fmt.Println("Spinning Up: ", alias, command)
-    visor.new_server(alias, command, cols, rows)
+    visor.new_server(alias, command, rows, cols)
     return visor.serve_create()
   default:
     return visor.four_oh_four()
   }
 }
 
-func (visor *Supervisor) new_server(alias string, command string, cols int, rows int){
+func (visor *Supervisor) new_server(alias string, command string, rows int, cols int){
   // find 2 free ports
   // start key server, screen servers and pty
   // stash the new PtyShare in pty_shares under the alias name
