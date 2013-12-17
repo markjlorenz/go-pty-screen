@@ -52,7 +52,10 @@ func (pty_interface *PtyInterface) Start() {
     for {
       bytes     := make([]byte, READSIZE)
       read, err := pty_interface.pty.Read(bytes)
-      if (err != nil) { return }
+      if (err != nil) {
+        close(pty_interface.out_chan)
+        return
+      }
       pty_interface.out_chan <- bytes[:read]
     }
   }()

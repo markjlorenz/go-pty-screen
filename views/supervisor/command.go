@@ -61,7 +61,7 @@ func (command *Command) FlashError(message string) (){
   command.clear()
   command.ColorOn(command.error_color)
   command.Print(message)
-  command.ColorOn(command.error_color)
+  command.ColorOff(command.error_color)
   command.Refresh()
   goncurses.NapMilliseconds(1000)
   command.clear()

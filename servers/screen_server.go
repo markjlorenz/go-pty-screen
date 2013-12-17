@@ -34,18 +34,24 @@ func (ss *ScreenServer) Listen (port int, channel chan []byte){
   go ss.accept_connections(&connections)
 
   for {
-    screen_bytes := <-channel
+    screen_bytes, is_open := <-channel
     ss.log_file.Write(screen_bytes)
     for _, conn := range connections {
+      if(!is_open) { conn.Close() }
       conn.Write(screen_bytes)
     }
+    if(!is_open){
+      ss.server.Close()
+      break
+    }
   }
+
 }
 
 func (ss *ScreenServer) accept_connections(connections *[]net.Conn){
   for {
     conn, err := ss.server.Accept()
-    if err != nil { panic(err) }
+    if err != nil { break }
     conn.Write( ss.log_file.Bytes() )
     *connections = append(*connections, conn)
   }
