@@ -69,7 +69,7 @@ func (list *List) print_row(item pty_servers.PtyShare) (){
 
 func (list *List) build_row(alias, command string) (string){
   _, row_length := list.Maxyx()
-  field_count   := 3 // 5 fields in PtyShare
+  field_count   := 3
   segment_size  := (row_length / field_count) - 1
   format_string := strings.Repeat("%-"+strconv.Itoa(segment_size)+"s", field_count)
 
@@ -85,8 +85,8 @@ func (list *List) Border() {
 
 func (list *List) SelectRow() (pty_servers.PtyShare){
   for {
-    switch char := list.GetChar()
-    char {
+    char := list.GetChar()
+    switch char {
     case 'k':
       list.selection_up()
     case 'j':
