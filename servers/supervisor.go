@@ -90,16 +90,20 @@ func (visor *Supervisor) new_server(alias string, command string, rows int, cols
   temp_file, err := os.Create("/tmp/"+strconv.Itoa(int(timestamp))+"~go-pty-screen~"+alias)
   if (err != nil) { panic(err) }
   pty.LogWriter   = temp_file
-  go pty.Start()
 
-  share := PtyShare{}
-  share.KeyServer    = key_server
-  share.ScreenServer = screen_server
-  share.Command      = command
-  share.Alias        = alias
+  share := PtyShare{
+    KeyServer:     key_server,
+    ScreenServer:  screen_server,
+    Command:       command,
+    Alias:         alias,
+  }
 
   visor.pty_shares[alias] = &share
   visor.update_chan <- share
+
+  pty.Start()
+
+  // if you get here this server is dead, you can remove it from the list
 }
 
 func (visor *Supervisor) parse_instructions(instructions io.Reader) (alias string, command string, cols int, rows int){
