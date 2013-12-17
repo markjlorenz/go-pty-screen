@@ -11,6 +11,7 @@ import (
 type List struct {
   *goncurses.Window
   header_color int16
+  error_color int16
   current_item int
   items        []pty_servers.PtyShare
 }
@@ -34,6 +35,9 @@ func (list *List) init_colors() {
   err := goncurses.InitPair(list.header_color, goncurses.C_MAGENTA, goncurses.C_BLACK)
   if err != nil { panic(err) }
 
+  list.error_color = 21
+  err = goncurses.InitPair(list.error_color, goncurses.C_RED, goncurses.C_BLACK)
+  if err != nil { panic(err) }
 }
 
 func (list *List) draw_initial() {
@@ -94,7 +98,7 @@ func (list *List) SelectRow() (pty_servers.PtyShare){
     case 10:
       return list.items[list.current_item]
     default:
-      print("Such fail. WoW.  Try 'j', 'k', or <enter>.")
+      list.FlashError("Such fail. WoW.  Try 'j', 'k', or <enter>.")
     }
   }
 }
@@ -110,5 +114,16 @@ func (list *List) selection_down(){
   if (list.current_item >= len(list.items) - 1) {
     list.current_item = len(list.items) - 1
   } else { list.current_item += 1 }
+  list.refresh()
+}
+
+func (list *List) FlashError(message string) () {
+  bottom, _ := list.Maxyx()
+  list.refresh()
+  list.ColorOn(list.error_color)
+  list.MovePrint(bottom-2, 2, message)
+  list.ColorOff(list.error_color)
+  list.Refresh()
+  goncurses.NapMilliseconds(1000)
   list.refresh()
 }
