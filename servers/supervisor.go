@@ -64,7 +64,7 @@ func (visor *Supervisor) route(req *http.Request) (string){
   case "POST/servers":
     alias, command, rows, cols := visor.parse_instructions(req.Body)
     // fmt.Println("Spinning Up: ", alias, command)
-    visor.new_server(alias, command, rows, cols)
+    go visor.new_server(alias, command, rows, cols)
     return visor.serve_create()
   default:
     return visor.four_oh_four()
