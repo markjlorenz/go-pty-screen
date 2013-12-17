@@ -10,10 +10,11 @@ import (
 
 type List struct {
   *goncurses.Window
-  header_color int16
-  error_color int16
-  current_item int
-  items        []pty_servers.PtyShare
+  header_color     int16
+  error_color      int16
+  selection_color  int16
+  current_item     int
+  items            []pty_servers.PtyShare
 }
 
 func NewList() (list *List){
@@ -38,10 +39,17 @@ func (list *List) init_colors() {
   list.error_color = 21
   err = goncurses.InitPair(list.error_color, goncurses.C_RED, goncurses.C_BLACK)
   if err != nil { panic(err) }
+
+  list.selection_color = 22
+  err = goncurses.InitPair(list.selection_color, goncurses.C_BLACK, goncurses.C_WHITE)
+  if err != nil { panic(err) }
 }
 
 func (list *List) draw_initial() {
   list.Move(1, 2)
+  list.ColorOn(list.header_color)
+  list.Println(list.build_row("ALIAS", "COMMAND"))
+  list.ColorOff(list.header_color)
   list.Border()
 }
 
@@ -62,9 +70,9 @@ func (list *List) AddItem(item pty_servers.PtyShare) (){
 func (list *List) print_row(item pty_servers.PtyShare) (){
   lasty, _    := list.Getyx()
   if (item == list.items[list.current_item]){
-    list.ColorOn(list.header_color)
+    list.ColorOn(list.selection_color)
     list.MovePrintln(lasty, 2, list.build_row(item.Alias, item.Command))
-    list.ColorOff(list.header_color)
+    list.ColorOff(list.selection_color)
   } else {
     list.MovePrintln(lasty, 2, list.build_row(item.Alias, item.Command))
   }
