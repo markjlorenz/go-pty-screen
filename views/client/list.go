@@ -27,7 +27,6 @@ func NewList() (list *List){
   list.init_colors()
   list.draw_initial()
 
-  go list.SelectRow()
   return
 }
 
