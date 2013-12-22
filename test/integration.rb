@@ -14,11 +14,17 @@ module EventualIO
   def debug?; @@debug == true; end
 
   def match_in_time?(io, regex, buffer, timeout=6)
-    timeout ||= 3
-    Timeout::timeout(timeout) {
+    timeout ||= 6
+    happens_in_time(timeout) do
       begin
         fill_buffer(io, buffer) { return false }
       end until buffer.match(regex)
+    end
+  end
+
+  def happens_in_time(timeout=3)
+    Timeout::timeout(timeout) {
+      yield
       true
     }
   rescue  Timeout::Error
@@ -50,7 +56,7 @@ RSpec::Matchers.define :eventually_match do |*attrs|
 
   match do |actual|
     screen.clear
-    EventualIO.match_in_time?(actual, regex, screen, timeout)
+    EventualIO.send(:match_in_time?, actual, regex, screen, timeout)
   end
 
   failure_message_for_should { |actual| Shellwords.escape(screen) }
@@ -72,6 +78,11 @@ describe "basic screen sharing" do
     it "registers the second application" do
       @server_stdin << 'new b2 bash 20 80'
       expect(@server_stdout).to eventually_match(/b2.+bash.+\d{4,}.+\d{4,}/)
+    end
+
+    it "registers the third application" do
+      @server_stdin << 'new b3 bash 20 80'
+      expect(@server_stdout).to eventually_match(/b3.+bash.+\d{4,}.+\d{4,}/)
     end
 
     context "a client connects" do
@@ -109,6 +120,16 @@ describe "basic screen sharing" do
         end
         @client2_stdin << 'exit'
       end
+
+      it "removes the closed app from the supervisor" do
+        expect(@server_stdout).to eventually_match(/b1(?!.+b2).+b3/)
+      end
+
+      it "doesn't show clients the removed app" do
+        @client4_stdout, @client4_stdin, @c4_pid = PTY.spawn 'go run go-pty-client.go'
+        expect(@client4_stdout).to eventually_match(/b1(?!.+b2).+b3/)
+      end
+
     end
   end
 

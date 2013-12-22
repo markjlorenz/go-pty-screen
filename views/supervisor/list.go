@@ -10,6 +10,7 @@ import (
 
 type List struct {
   *goncurses.Window
+  items map[string] *pty_servers.PtyShare
   header_color int16
 }
 
@@ -21,6 +22,7 @@ func NewList() (list *List){
 
 
   list.Window = &window
+  list.items  = make(map[string] *pty_servers.PtyShare)
   list.init_colors()
   list.draw_initial()
   return
@@ -33,20 +35,36 @@ func (list *List) init_colors() {
 }
 
 func (list *List) draw_initial(){
-  list.ColorOn(list.header_color)
-  list.MovePrintln(1, 2, list.build_row("ALIAS", "COMMAND", "KEY_PORT", "SCREEN_PORT"))
-  list.ColorOff(list.header_color)
+  list.draw_list()
   list.MovePrintln(2, 2, "No servers running.  Type: `new <alias> <command> <rows> <cols>` into the command window to start one.")
-  list.Move(2, 2)
   list.Border()
 }
 
 func (list *List) AddItem(item pty_servers.PtyShare) (){
-  lasty, _    := list.Getyx()
-  key_port    := strconv.Itoa(item.KeyServer.Port)
-  screen_port := strconv.Itoa(item.ScreenServer.Port)
-  list.MovePrintln(lasty, 2, list.build_row(item.Alias, item.Command, key_port, screen_port))
+  list.items[item.Alias] = &item
+  list.draw_list()
+  list.Refresh()
+}
 
+func (list *List) RemoveItem(alias string) (){
+  delete(list.items, alias)
+  list.draw_list()
+  list.Refresh()
+}
+
+func (list *List) draw_list(){
+  list.Clear()
+
+  list.ColorOn(list.header_color)
+  list.MovePrintln(1, 2, list.build_row("ALIAS", "COMMAND", "KEY_PORT", "SCREEN_PORT"))
+  list.ColorOff(list.header_color)
+  list.Move(2, 2)
+  for _, item := range list.items {
+    cury, _     := list.Getyx()
+    key_port    := strconv.Itoa(item.KeyServer.Port)
+    screen_port := strconv.Itoa(item.ScreenServer.Port)
+    list.MovePrintln(cury, 2, list.build_row(item.Alias, item.Command, key_port, screen_port))
+  }
   list.Border()
 }
 

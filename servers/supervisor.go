@@ -22,13 +22,15 @@ type PtyShare struct {
 
 type Supervisor struct {
   pty_shares  map[string]*PtyShare
-  update_chan chan PtyShare
+  create_chan chan PtyShare
+  delete_chan chan string
 }
 
-func NewSupervisor(updates chan PtyShare) (visor *Supervisor){
+func NewSupervisor(creates chan PtyShare, deletes chan string) (visor *Supervisor){
   visor = new(Supervisor)
   visor.pty_shares  = make(map[string]*PtyShare)
-  visor.update_chan = updates
+  visor.create_chan = creates
+  visor.delete_chan = deletes
   return
 }
 
@@ -99,11 +101,13 @@ func (visor *Supervisor) new_server(alias string, command string, rows int, cols
   }
 
   visor.pty_shares[alias] = &share
-  visor.update_chan <- share
+  visor.create_chan <- share
 
   pty.Start()
 
   // if you get here this server is dead, you can remove it from the list
+  delete(visor.pty_shares, alias)
+  visor.delete_chan <- share.Alias
 }
 
 func (visor *Supervisor) parse_instructions(instructions io.Reader) (alias string, command string, cols int, rows int){

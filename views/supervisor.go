@@ -39,10 +39,15 @@ func (supervisor *Supervisor) Refresh() {
   supervisor.command_window.Refresh()
 }
 
-func (supervisor *Supervisor) WatchFeed(feed chan pty_servers.PtyShare) {
+func (supervisor *Supervisor) CreateFeed(feed chan pty_servers.PtyShare) {
   for update := range feed {
     supervisor.list_window.AddItem(update)
-    supervisor.list_window.Refresh()
+  }
+}
+
+func (supervisor *Supervisor) DeleteFeed(feed chan string) {
+  for update := range feed {
+    supervisor.list_window.RemoveItem(update)
   }
 }
 
