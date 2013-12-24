@@ -11,7 +11,7 @@ module EventualIO
 
   @@debug = false
   def debug=(val); @@debug = val; end
-  def debug?; @@debug == true; end
+  def debug?; !!@@debug; end
 
   def match_in_time?(io, regex, buffer, timeout=6)
     timeout ||= 6
@@ -56,7 +56,7 @@ RSpec::Matchers.define :eventually_match do |*attrs|
 
   match do |actual|
     screen.clear
-    EventualIO.send(:match_in_time?, actual, regex, screen, timeout)
+    EventualIO.match_in_time? actual, regex, screen, timeout
   end
 
   failure_message_for_should { |actual| Shellwords.escape(screen) }
@@ -66,8 +66,12 @@ describe "basic screen sharing" do
 
   describe "`new` creates a new application" do
     before(:all) do
-      @server_stdout, @server_stdin, pid = PTY.spawn 'go run go-pty-server.go'
+      @server_stdout, @server_stdin, @s_pid = PTY.spawn 'go run go-pty-server.go'
       EventualIO.sleep_until(@server_stdout) { |screen| screen.match /Available.+PTYs/ }
+    end
+
+    after(:all) do
+      Process.kill("KILL", @s_pid)
     end
 
     it "registers the first application" do
@@ -130,6 +134,31 @@ describe "basic screen sharing" do
         expect(@client4_stdout).to eventually_match(/b1(?!.+b2).+b3/)
       end
 
+    end
+
+    context "starting multiple apps from http" do
+      it "starts two new apps" do
+        `nc localhost 2000 < test/create-test-3.http`
+        expect(@server_stdout).to eventually_match(/vim-2.+vim.+\d{4,}.+\d{4,}/)
+        expect(@server_stdout).to eventually_match(/b4.+bash.+\d{4,}.+\d{4,}/)
+      end
+    end
+
+  end
+
+  describe "loading the .rc file" do
+    before(:all) do
+      @server_stdout, @server_stdin, @s_pid =
+        PTY.spawn 'go run go-pty-server.go --config-file=test/create-test-3.http'
+    end
+
+    after(:all) do
+      Process.kill("KILL", @s_pid)
+    end
+
+    it "registers the rc'd applications" do
+      expect(@server_stdout).to eventually_match(/vim-2.+vim.+\d{4,}.+\d{4,}/)
+      expect(@server_stdout).to eventually_match(/b4.+bash.+\d{4,}.+\d{4,}/)
     end
   end
 

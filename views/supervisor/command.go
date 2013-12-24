@@ -35,7 +35,7 @@ func (command *Command) init_colors() {
 
 func (command *Command) Border() {
   lasty, lastx := command.Getyx()
-  command.Box('|', '_')
+  command.Box('|', '-')
   command.MovePrint(0, 2, "[ Enter a command: ]")
   command.Move(lasty, lastx)
 }

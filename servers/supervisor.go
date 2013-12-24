@@ -4,7 +4,6 @@ import (
   "net"
   "net/http"
   "io"
-  "io/ioutil"
   "os"
   "bufio"
   "strconv"
@@ -26,6 +25,13 @@ type Supervisor struct {
   delete_chan chan string
 }
 
+type instruction struct {
+  alias     string
+  command   string
+  rows      int
+  cols      int
+}
+
 func NewSupervisor(creates chan PtyShare, deletes chan string) (visor *Supervisor){
   visor = new(Supervisor)
   visor.pty_shares  = make(map[string]*PtyShare)
@@ -34,11 +40,13 @@ func NewSupervisor(creates chan PtyShare, deletes chan string) (visor *Superviso
   return
 }
 
-func (visor *Supervisor) Listen(port int) {
+func (visor *Supervisor) Listen(port int, ready chan int) {
   port_string := strconv.Itoa(port)
   server, err := net.Listen("tcp", ":"+port_string)
   if err != nil { panic(err) }
 
+  ready <- port
+  close(ready)
   for {
     conn, err := server.Accept()
     if err != nil { panic(err) }
@@ -58,15 +66,15 @@ func (visor *Supervisor) process_request(conn net.Conn) {
 }
 
 func (visor *Supervisor) route(req *http.Request) (string){
-  // fmt.Println(req.URL)
   switch route_string := (req.Method + req.URL.Path)
   route_string {
   case "GET/servers":
     return visor.serve_list()
   case "POST/servers":
-    alias, command, rows, cols := visor.parse_instructions(req.Body)
-    // fmt.Println("Spinning Up: ", alias, command)
-    go visor.new_server(alias, command, rows, cols)
+    instructions := visor.parse_instructions(req.Body)
+    for _, instr := range instructions {
+      go visor.new_server(instr.alias, instr.command, instr.rows, instr.cols)
+    }
     return visor.serve_create()
   default:
     return visor.four_oh_four()
@@ -110,15 +118,19 @@ func (visor *Supervisor) new_server(alias string, command string, rows int, cols
   visor.delete_chan <- share.Alias
 }
 
-func (visor *Supervisor) parse_instructions(instructions io.Reader) (alias string, command string, cols int, rows int){
-
-  raw_cmd, err := ioutil.ReadAll(instructions)
-  if err != nil { panic(err) }
-  fields := strings.Fields(string(raw_cmd))
-  alias   = fields[0]
-  command = fields[1]
-  cols, _ = strconv.Atoi(fields[2])
-  rows, _ = strconv.Atoi(fields[3])
+func (visor *Supervisor) parse_instructions(instructions io.Reader) (instr_set []instruction){
+  scanner := bufio.NewScanner(instructions)
+  for scanner.Scan() {
+    fields  := strings.Fields(scanner.Text())
+    rows, _ := strconv.Atoi(fields[2])
+    cols, _ := strconv.Atoi(fields[3])
+    instr_set = append(instr_set, instruction{
+      alias:    fields[0],
+      command:  fields[1],
+      cols:     cols,
+      rows:     rows,
+    })
+  }
   return
 }
 
