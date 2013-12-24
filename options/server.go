@@ -3,31 +3,24 @@ package options
 import (
   "flag"
   "os"
-  "code.google.com/p/go.crypto/ssh/terminal"
 )
 
 type Server struct {
-  Rows uint16
-  Cols uint16
-  Port int
-  App  string
+  Port       int
+  RCFilename string
 }
 
 func (s *Server) Parse() {
-  tty, _        := os.Open("/dev/tty")
-  tty_fd        := int( tty.Fd() )
+  rc_filename := os.Getenv("HOME")+"/.go-pty-rc"
+  port        := 2000
 
-  cols, rows, _ := terminal.GetSize( tty_fd )
-  port          := 2000
-
-  flag.IntVar(&rows, "rows", rows, "terminal rows (defaults to rows of current terminal)")
-  flag.IntVar(&cols, "cols", cols, "terminal columns (defaults to columns of current terminal)")
   flag.IntVar(&port, "port", port, "port to run the server on")
+
+  flag.StringVar(&rc_filename, "config-file", rc_filename,
+    "a config file to run on server startup.")
 
   flag.Parse()
 
-  s.Rows = uint16(rows)
-  s.Cols = uint16(cols)
-  s.Port = port
-  s.App  = flag.Arg(0)
+  s.Port       = port
+  s.RCFilename = rc_filename
 }

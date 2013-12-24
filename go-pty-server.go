@@ -4,7 +4,6 @@ import (
   "dapplebeforedawn/share-pty/servers"
   "dapplebeforedawn/share-pty/options"
   "dapplebeforedawn/share-pty/views"
-  "os"
 )
 
 func main() {
@@ -20,8 +19,7 @@ func main() {
   go view.WatchCommands(opts.Port)
   view.Refresh()
 
-  rc_filename := os.Getenv("HOME")+"/.go-pty-rc"
-  rc_loader   := pty_servers.NewRCLoader(ready_feed, rc_filename)
+  rc_loader   := pty_servers.NewRCLoader(ready_feed, opts.RCFilename)
   go rc_loader.OnReady()
 
   supervisor := pty_servers.NewSupervisor(create_feed, delete_feed)
