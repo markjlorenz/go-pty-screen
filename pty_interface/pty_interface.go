@@ -63,3 +63,6 @@ func (pty_interface *PtyInterface) Start() {
   pty_interface.command.Wait()
 }
 
+func (pty_interface *PtyInterface) Close() {
+  pty_interface.command.Process.Kill()
+}

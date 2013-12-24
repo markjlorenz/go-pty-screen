@@ -13,11 +13,11 @@ type KeyServer struct {
   server     net.Listener
 }
 
-func NewKeyServer() (ks *KeyServer) {
-  return &KeyServer{ stay_alive: make(chan int, 2) }
+func NewKeyServer(client_limit int) (ks *KeyServer) {
+  return &KeyServer{ stay_alive: make(chan int, client_limit) }
 }
 
-func (ks *KeyServer) Listen(port int, channel chan []byte) {
+func (ks *KeyServer) Listen(port int, channel chan []byte, completed func()) {
   port_string := strconv.Itoa(port)
   server, err := net.Listen("tcp", ":"+port_string)
   if err != nil { panic(err) }
@@ -27,12 +27,13 @@ func (ks *KeyServer) Listen(port int, channel chan []byte) {
 
   for {
     conn, err := server.Accept()
-    if err != nil { panic(err) }
+    if err != nil { break }
 
     // put a placeholder in the stay-alive channel
     ks.stay_alive <- 1
     go ks.connection_to_channel(conn, channel)
   }
+  completed()
 }
 
 func (ks *KeyServer) connection_to_channel(conn net.Conn, channel chan []byte) {
@@ -46,8 +47,8 @@ func (ks *KeyServer) connection_to_channel(conn net.Conn, channel chan []byte) {
 
   // pop one off the stay live channel,
   //if empty kill the channel and the server
-  _, is_alive := <-ks.stay_alive
-  if (!is_alive){
+  _, _ = <-ks.stay_alive
+  if (len(ks.stay_alive) == 0){
     close(channel)
     ks.server.Close()
   }

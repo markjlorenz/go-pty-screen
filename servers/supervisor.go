@@ -88,13 +88,14 @@ func (visor *Supervisor) new_server(alias string, command string, rows int, cols
   key_channel     := make(chan []byte)
   screen_channel  := make(chan []byte)
 
+  key_server    := NewKeyServer(1024)
   screen_server := NewScreenServer()
-  key_server    := NewKeyServer()
 
   // let the OS assign a port
-  go key_server.Listen(0, key_channel)
   go screen_server.Listen(0, screen_channel)
   pty := pty_interface.NewPty(command, uint16(rows), uint16(cols), key_channel, screen_channel)
+  pty_completed := func(){ pty.Close() }
+  go key_server.Listen(0, key_channel, pty_completed)
 
   timestamp      := time.Now().Unix()
   temp_file, err := os.Create("/tmp/"+strconv.Itoa(int(timestamp))+"~go-pty-screen~"+alias)
@@ -114,8 +115,12 @@ func (visor *Supervisor) new_server(alias string, command string, rows int, cols
   pty.Start()
 
   // if you get here this server is dead, you can remove it from the list
+  visor.pty_closed(alias)
+}
+
+func (visor *Supervisor) pty_closed(alias string) (){
   delete(visor.pty_shares, alias)
-  visor.delete_chan <- share.Alias
+  visor.delete_chan <- alias
 }
 
 func (visor *Supervisor) parse_instructions(instructions io.Reader) (instr_set []instruction){
