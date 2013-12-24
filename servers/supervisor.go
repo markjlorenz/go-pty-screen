@@ -122,8 +122,8 @@ func (visor *Supervisor) parse_instructions(instructions io.Reader) (instr_set [
   scanner := bufio.NewScanner(instructions)
   for scanner.Scan() {
     fields  := strings.Fields(scanner.Text())
-    cols, _ := strconv.Atoi(fields[2])
-    rows, _ := strconv.Atoi(fields[3])
+    rows, _ := strconv.Atoi(fields[2])
+    cols, _ := strconv.Atoi(fields[3])
     instr_set = append(instr_set, instruction{
       alias:    fields[0],
       command:  fields[1],
