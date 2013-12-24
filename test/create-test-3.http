@@ -1,5 +1,5 @@
 POST /servers HTTP/1.1
-Content-Length: 33
+Content-Length: 30
 
 vim-2 vim 20 80
-bash-4 bash 20 80
+b4 bash 20 80
