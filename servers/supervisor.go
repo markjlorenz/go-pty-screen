@@ -66,7 +66,6 @@ func (visor *Supervisor) process_request(conn net.Conn) {
 }
 
 func (visor *Supervisor) route(req *http.Request) (string){
-  // fmt.Println(req.URL)
   switch route_string := (req.Method + req.URL.Path)
   route_string {
   case "GET/servers":

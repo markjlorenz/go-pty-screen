@@ -12,7 +12,7 @@ type RCLoader struct {
 
 func NewRCLoader(feed chan int, rc_filename string) (rc *RCLoader) {
     rc_file, f_err := os.Open(rc_filename)
-    if ( f_err != nil ) { return &RCLoader{} }
+    if ( f_err != nil ) { return &RCLoader{ feed: feed, } }
     rc = &RCLoader{
       rc_file: rc_file,
       feed:    feed,
