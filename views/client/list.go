@@ -89,7 +89,7 @@ func (list *List) build_row(alias, command string) (string){
 
 func (list *List) Border() {
   lasty, lastx := list.Getyx()
-  list.Box('|', '_')
+  list.Box('|', '-')
   list.MovePrint(0, 2, "[ Available PTYs ]")
   list.Move(lasty, lastx)
 }
