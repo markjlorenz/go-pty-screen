@@ -131,6 +131,17 @@ describe "basic screen sharing" do
       end
 
     end
+
+    context "loading the .rc file" do
+    end
+
+    context "starting multiple apps from http" do
+      it "starts two new apps" do
+        `nc localhost 2000 < test/create-test-3.http`
+        expect(@server_stdout).to eventually_match(/vim-2.+vim.+\d{4,}.+\d{4,}/)
+        expect(@server_stdout).to eventually_match(/bash-4.+bash.+\d{4,}.+\d{4,}/)
+      end
+    end
   end
 
 end
