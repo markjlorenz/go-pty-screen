@@ -2,7 +2,7 @@
 > Easily screen-share any terminal application
 
 ## TL;DR
-![]()
+![demo.gif](https://github.com/dapplebeforedawn/go-pty-screen/raw/master/demo.gif)
 
 ## Installation
  - One step! (try that with ruby)
