@@ -1,6 +1,9 @@
 # go/pty/screen
 > Easily screen-share any terminal application
 
+## TL;DR
+![]()
+
 ## Installation
  - One step! (try that with ruby)
  - Copy both files from `bin` to somewhere in your `$PATH`
@@ -9,42 +12,73 @@
  ```
 
 ## Usage
-The host (running the to-be-shared application):
+### The Host
+The host (running the to-be-shared applications):
 ```bash
-go-pty-server application-name
-
-# e.g.
-go-pty-server vim  # let's pair program
-go-pty-server --key_port=2002 --screen_port=2003  "bundle exec guard" # so you can see the test runner
-
-# Note, when flag arguments are used, the application name _must_ come last
+go-pty-server
 ```
 
+Now start some application termials with the `new` command:
+```
+> new our-tests bash 20 80
+# new <alias> <command> <terminal rows> <terminal cols>
+```
+
+### The Clients
 Any number of clients:
 ```bash
 go-pty-client <ip of server>
-
-# e.g.
-go-pty-client 192.168.100.1   # shows us vim
-go-pty-client --key_port=2002 --screen_port=2003  192.168.100.1  # shows us the test runner
 
 # its not a bad idea to chain a call to `reset` at the end
 go-pty-client <ip of server>; reset
 ```
 
+## Scripting
+go-pty-screen uses HTTP as it's inter-application communication protocol.  This makes it really easy to script.  You can even send it commands from your web browser (try loading `http://localhost:2000/servers` after starting some application terminals.
+
+You can provide a startup script using the `--rc-file` option, or by default `~/.go-pty-rc` will be loaded at boot.  For an example rc file, you can use `test/create-test-3.http` (e.g. `cp test/create-test-3.http ~/.go-pty-rc`)
+
 ## Project Structure
 ```
-├── README.markdown
-├── go-pty-client.go      # the client application
-├── go-pty-server.go      # the server application
+├── Makefile                    # `make build` to build the client and server
+├── README.markdown             # you are here
+├── bin
+│   ├── go-pty-client           # an OSX 10.8 pre-compiled binary
+│   └── go-pty-server           # an OSX 10.8 pre-compiled binary
+├── clients
+│   ├── go-pty-client.go        # manages a single application connection to the server
+│   └── list.go                 # manages the clients list view of app choices
+├── go-pty-client.go            # top level setup for the client
+├── go-pty-server.go            # top level setup for the server
 ├── options
-│   ├── client.go         # options parser for the client
-│   └── server.go         # options parser for the server
+│   ├── client.go               # options parsing for the client
+│   └── server.go               # options parsing for the server
 ├── pty_interface
-│   └── pty_interface.go  # used by the server to interact with the pty
-└── servers
-    ├── key_server.go     # network connection for the stdin of the pty
-    └── screen_server.go  # network connection for the stdout of the pty
+│   └── pty_interface.go        # manages pseudo-termainal and it's contained application
+├── servers
+│   ├── key_server.go           # receives key strokes all connected clients to a single app
+│   ├── screen_server.go        # sends screens state for a single app to all connected clients
+│   ├── supervisor.go           # responds to HTTP requests about the state of the supervisor
+│   └── supervisor_rc_loader.go # loads the startup config file
+├── test
+│   ├── create-test-2.http      # fixture data
+│   ├── create-test-3.http
+│   ├── create-test.http
+│   ├── integration.rb          # an integration test `rspec integration.rb`
+│   └── list-test.http
+└── views
+    ├── client
+    │   └── list.go             # the clients list of available apps
+    ├── supervisor
+    │   ├── command.go          # the command window on the server
+    │   └── list.go             # the list of app running on the server
+    └── supervisor.go           # coordinates operation of `supervisor/command.go` and `supervisor/list.go`
+```
+
+## Building:
+If you need to build from source (maybe to cross-compile for a 64 bit linux)
+```
+GOOS=linux GOARCH=amd64 make build
 ```
 
 ## Note:
