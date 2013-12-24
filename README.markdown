@@ -36,7 +36,7 @@ go-pty-client <ip of server>; reset
 ## Scripting
 go-pty-screen uses HTTP as it's inter-application communication protocol.  This makes it really easy to script.  You can even send it commands from your web browser (try loading `http://localhost:2000/servers` after starting some application terminals.
 
-You can provide a startup script using the `--rc-file` option, or by default `~/.go-pty-rc` will be loaded at boot.  For an example rc file, you can use `test/create-test-3.http` (e.g. `cp test/create-test-3.http ~/.go-pty-rc`)
+You can provide a startup script using the `--config-file` option, or by default `~/.go-pty-rc` will be loaded at boot.  For an example rc file, you can use `test/create-test-3.http` (e.g. `cp test/create-test-3.http ~/.go-pty-rc`)
 
 ## Project Structure
 ```

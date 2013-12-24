@@ -11,7 +11,7 @@ module EventualIO
 
   @@debug = false
   def debug=(val); @@debug = val; end
-  def debug?; @@debug == true; end
+  def debug?; !!@@debug; end
 
   def match_in_time?(io, regex, buffer, timeout=6)
     timeout ||= 6
@@ -56,7 +56,7 @@ RSpec::Matchers.define :eventually_match do |*attrs|
 
   match do |actual|
     screen.clear
-    EventualIO.send(:match_in_time?, actual, regex, screen, timeout)
+    EventualIO.match_in_time? actual, regex, screen, timeout
   end
 
   failure_message_for_should { |actual| Shellwords.escape(screen) }
@@ -139,8 +139,8 @@ describe "basic screen sharing" do
     context "starting multiple apps from http" do
       it "starts two new apps" do
         `nc localhost 2000 < test/create-test-3.http`
-        expect(@server_stdout).to eventually_match(/b4.+bash.+\d{4,}.+\d{4,}/)
         expect(@server_stdout).to eventually_match(/vim-2.+vim.+\d{4,}.+\d{4,}/)
+        expect(@server_stdout).to eventually_match(/b4.+bash.+\d{4,}.+\d{4,}/)
       end
     end
 
