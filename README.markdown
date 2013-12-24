@@ -28,9 +28,6 @@ Now start some application termials with the `new` command:
 Any number of clients:
 ```bash
 go-pty-client <ip of server>
-
-# its not a bad idea to chain a call to `reset` at the end
-go-pty-client <ip of server>; reset
 ```
 
 ## Scripting
@@ -75,13 +72,13 @@ You can provide a startup script using the `--config-file` option, or by default
     └── supervisor.go           # coordinates operation of `supervisor/command.go` and `supervisor/list.go`
 ```
 
-## Building:
+## Building
 If you need to build from source (maybe to cross-compile for a 64 bit linux)
 ```
 GOOS=linux GOARCH=amd64 make build
 ```
 
-## Note:
+## Note
 Yes, another one of these.  The ruby versions were fun to code, but since a ruby application can not reliably be "distributed" as a stand alone application, it's nearly impossible for non-ruby devs to enjoy the fun.
 
 More importantly, running ruby scripts rely on the version of ruby in the $PATH.  Since dev/pty/screen and dev/pty/vim both require ruby >= 2.0 this makes it impossible to use them while developing a <= 1.9 application.  Go-lang makes distributing standalone binaries stupid easy, so here we are!
