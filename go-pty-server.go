@@ -4,6 +4,7 @@ import (
   "dapplebeforedawn/share-pty/servers"
   "dapplebeforedawn/share-pty/options"
   "dapplebeforedawn/share-pty/views"
+  "dapplebeforedawn/share-pty/zeroconf"
 )
 
 func main() {
@@ -21,6 +22,8 @@ func main() {
 
   rc_loader   := pty_servers.NewRCLoader(ready_feed, opts.RCFilename)
   go rc_loader.OnReady()
+
+  go zeroconf.StartAnnounce(opts.Port)
 
   supervisor := pty_servers.NewSupervisor(create_feed, delete_feed)
   supervisor.Listen(opts.Port, ready_feed)
