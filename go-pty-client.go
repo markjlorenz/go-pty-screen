@@ -13,7 +13,9 @@ func main() {
 
   if (opts.ServerIP == "") {
     zc := zeroconf.NewClient()
-    opts.ServerIP = zc.Dial()
+    zc.Dial()
+    opts.ServerIP = zc.Host
+    opts.Port     = zc.Port
   }
 
   defer goncurses.End()
