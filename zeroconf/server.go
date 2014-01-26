@@ -7,7 +7,7 @@ import (
 func StartAnnounce(port int) {
   rc := make(chan *dnssd.RegisterReply)
   _, err := dnssd.ServiceRegister(
-    0,
+    dnssd.DNSServiceFlagsSuppressUnusable,
     0,
     "GoPtyScreen",
     "_goptyscreen._tcp.",
