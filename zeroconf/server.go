@@ -13,7 +13,7 @@ func StartAnnounce(port int) {
     "_goptyscreen._tcp.",
     "",
     "",
-    port,
+    (uint16)(port),
     rc,
   )
   if err != nil { println(err); return }
