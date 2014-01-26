@@ -14,7 +14,7 @@ func StartAnnounce(port int) {
     "",
     "",
     (uint16)(port),
-    "markstxtrecord=1",
+    nil,
     rc,
   )
   if err != nil { panic(err); return }
