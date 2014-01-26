@@ -6,7 +6,7 @@ import (
 
 func StartAnnounce(port int) {
   rc := make(chan *dnssd.RegisterReply)
-  ctx, err := dnssd.ServiceRegister(
+  _, err := dnssd.ServiceRegister(
     0,
     0,
     "GoPtyScreen",
@@ -17,6 +17,4 @@ func StartAnnounce(port int) {
     rc,
   )
   if err != nil { println(err); return }
-
-  go dnssd.Process(ctx)
 }
