@@ -20,6 +20,7 @@ func (c *Client) Dial() {
   ctx, err := dnssd.Browse(dnssd.DNSServiceInterfaceIndexAny, "_goptyscreen._tcp", bc)
   if err != nil { println(err); return }
 
+  defer ctx.Release()
   go dnssd.Process(ctx)
 
   for {
@@ -37,6 +38,7 @@ func (c *Client) Dial() {
     )
     if err != nil { println(err); return }
 
+    defer rctx.Release()
     go dnssd.Process(rctx)
     resolveReply, _ := <-rc
 

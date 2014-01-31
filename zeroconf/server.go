@@ -4,9 +4,9 @@ import (
   "github.com/dapplebeforedawn/go-dnssd"
 )
 
-func StartAnnounce(port int) {
+func StartAnnounce(port int) (*dnssd.Context, error){
   rc := make(chan *dnssd.RegisterReply)
-  _, err := dnssd.ServiceRegister(
+  ctx, err := dnssd.ServiceRegister(
     dnssd.DNSServiceFlagsSuppressUnusable,
     0,
     "GoPtyScreen",
@@ -17,5 +17,12 @@ func StartAnnounce(port int) {
     nil,
     rc,
   )
-  if err != nil { panic(err); return }
+
+  if err != nil { panic(err); }
+
+  go dnssd.Process(ctx)
+
+  _, _ = <-rc // wait for the register reply
+
+  return ctx, nil
 }
