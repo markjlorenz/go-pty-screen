@@ -41,7 +41,12 @@ type Sender struct {
 
 func (sender *Sender) SendData(data []byte, closed bool) {
   for sender.conn == nil {
-    sender.conn, _ = net.Dial("tcp", sender.host+":"+sender.port)
+    var cantConnect error
+    sender.conn, cantConnect = net.Dial("tcp", sender.host+":"+sender.port)
+    if cantConnect !=nil {
+      panic(cantConnect)
+      // sender.conn, _ = dialBonjour()
+    }
   }
   sender.conn.Write(data)
 

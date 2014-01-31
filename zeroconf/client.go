@@ -5,19 +5,28 @@ import (
 )
 
 type Client struct {
-  Host string
-  Port int
+  Host        string
+  Port        int
+  ServiceType string
 }
 
-func NewClient() (*Client) {
-  return &Client{}
+func NewClient(serviceType string) (*Client) {
+  return &Client{
+    ServiceType: serviceType,
+  }
 }
 
 func (c *Client) Dial() {
   println("Waiting for available server...")
+  alwaysMatch := func(txtRecords map[string]string) bool { return true }
+  c.DialWhenMatch(alwaysMatch)
+}
 
+type Matcher func(txtRecords map[string]string) bool
+
+func (c *Client) DialWhenMatch (matcher Matcher) {
   bc := make(chan *dnssd.BrowseReply)
-  ctx, err := dnssd.Browse(dnssd.DNSServiceInterfaceIndexAny, "_goptyscreen._tcp", bc)
+  ctx, err := dnssd.Browse(dnssd.DNSServiceInterfaceIndexAny, c.ServiceType, bc)
   if err != nil { println(err); return }
 
   go dnssd.Process(ctx)
@@ -40,8 +49,10 @@ func (c *Client) Dial() {
     go dnssd.Process(rctx)
     resolveReply, _ := <-rc
 
-    c.Host = resolveReply.HostTarget
-    c.Port = int(resolveReply.Port)
-    break
+    if matcher(resolveReply.TxtRecordMap) {
+      c.Host = resolveReply.HostTarget
+      c.Port = int(resolveReply.Port)
+      break
+    }
   }
 }
