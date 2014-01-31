@@ -78,6 +78,16 @@ If you need to build from source (maybe to cross-compile for a 64 bit linux)
 GOOS=linux GOARCH=amd64 make build
 ```
 
+## Tests
+The interaction between these two apps is a litle hard to test.  The included intgration test is an attempt, but not a great one.  To run the spec:
+
+```bash
+cd /path/to/repo/root
+rspec test/integration.rb
+```
+
+but don't expect them all to pass.
+
 ## Note
 Yes, another one of these.  The ruby versions were fun to code, but since a ruby application can not reliably be "distributed" as a stand alone application, it's nearly impossible for non-ruby devs to enjoy the fun.
 
