@@ -16,9 +16,9 @@ func NewServer(serviceType string) *Server {
 }
 
 //"_goptyscreen._tcp."
-func (s *Server) StartAnnounce(port int) {
+func StartAnnounce(port int) (*dnssd.Context, error){
   rc := make(chan *dnssd.RegisterReply)
-  _, err := dnssd.ServiceRegister(
+  ctx, err := dnssd.ServiceRegister(
     dnssd.DNSServiceFlagsSuppressUnusable,
     0,
     "GoPtyScreen",
@@ -29,5 +29,12 @@ func (s *Server) StartAnnounce(port int) {
     c.TxtRecords,
     rc,
   )
-  if err != nil { panic(err); return }
+
+  if err != nil { panic(err); }
+
+  go dnssd.Process(ctx)
+
+  _, _ = <-rc // wait for the register reply
+
+  return ctx, nil
 }

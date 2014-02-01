@@ -29,6 +29,7 @@ func (c *Client) DialWhenMatch (matcher Matcher) {
   ctx, err := dnssd.Browse(dnssd.DNSServiceInterfaceIndexAny, c.ServiceType, bc)
   if err != nil { println(err); return }
 
+  defer ctx.Release()
   go dnssd.Process(ctx)
 
   for {
@@ -46,6 +47,7 @@ func (c *Client) DialWhenMatch (matcher Matcher) {
     )
     if err != nil { println(err); return }
 
+    defer rctx.Release()
     go dnssd.Process(rctx)
     resolveReply, _ := <-rc
 
