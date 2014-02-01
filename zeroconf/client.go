@@ -34,7 +34,7 @@ func (c *Client) DialWhenMatch (matcher Matcher) {
 
   for {
     browseReply, ok := <-bc
-    if !ok { println("No suitable server found."); break }
+    if !ok { break }
 
     rc := make(chan *dnssd.ResolveReply)
     rctx, err := dnssd.Resolve(
