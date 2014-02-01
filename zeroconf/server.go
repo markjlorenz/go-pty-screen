@@ -15,8 +15,7 @@ func NewServer(serviceType string) *Server {
   }
 }
 
-//"_goptyscreen._tcp."
-func StartAnnounce(port int) (*dnssd.Context, error){
+func (s *Server)StartAnnounce(port int) (*dnssd.Context, error){
   rc := make(chan *dnssd.RegisterReply)
   ctx, err := dnssd.ServiceRegister(
     dnssd.DNSServiceFlagsSuppressUnusable,
@@ -26,7 +25,7 @@ func StartAnnounce(port int) (*dnssd.Context, error){
     "",
     "",
     (uint16)(port),
-    c.TxtRecords,
+    s.TxtRecords,
     rc,
   )
 
