@@ -4,17 +4,28 @@ import (
   "github.com/dapplebeforedawn/go-dnssd"
 )
 
-func StartAnnounce(port int) (*dnssd.Context, error){
+type Server struct {
+  ServiceType string
+  TxtRecords  map[string]string
+}
+
+func NewServer(serviceType string) *Server {
+  return &Server{
+    ServiceType: serviceType,
+  }
+}
+
+func (s *Server)StartAnnounce(port int) (*dnssd.Context, error){
   rc := make(chan *dnssd.RegisterReply)
   ctx, err := dnssd.ServiceRegister(
     dnssd.DNSServiceFlagsSuppressUnusable,
     0,
     "GoPtyScreen",
-    "_goptyscreen._tcp.",
+    s.ServiceType,
     "",
     "",
     (uint16)(port),
-    nil,
+    s.TxtRecords,
     rc,
   )
 

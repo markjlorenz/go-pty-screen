@@ -11,7 +11,8 @@ func main() {
   opts := options.Server{}
   opts.Parse()
 
-  bonjour, err := zeroconf.StartAnnounce(opts.Port)
+  server       := zeroconf.NewServer("_goptyscreen._tcp.")
+  bonjour, err := server.StartAnnounce(opts.Port)
   if err != nil { panic(err) }
   defer bonjour.Release()
 
