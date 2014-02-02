@@ -31,14 +31,18 @@ go-pty-client <ip of server>  # server ip is option if on a local network
 ```
 
 ### The Tunnel
-The tunnel is a quick network pipe that can be used to easily transfer files, or use program on the client that are no available on the server.  Some examples:
+The tunnel is a quick network pipe that can be used to easily transfer files, or use program on the client that are not available on the server.  Some examples:
 * client: `echo "come here watson" | go-pty-tunnel`
 * server: `go-pty-tunnel`
 * output (server): `come here watson`
 
+---
+
 * client: `go-pty-tunnel | pbcopy`
 * server: `pbpaste | go-pty-tunnel`
 * output: the clients clipboard now has the same contents as the servers clipboard.
+
+---
 
 * client: `cowsay "midwestern commit message" | go-pty-tunnel`
 * server: `go-pty-tunnel | git commit -F -`  (the server does not have the cowsay program installed)
