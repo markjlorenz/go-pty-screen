@@ -1,4 +1,4 @@
- go/pty/screen
+# go/pty/screen
 > Easily screen-share any terminal application
 
 ## TL;DR
